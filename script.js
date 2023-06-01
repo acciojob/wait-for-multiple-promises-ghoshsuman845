@@ -1,45 +1,57 @@
 //your JS code here. If required.
-//your JS code here. If required.
-let resultarray=[];
-const loadingElement= document.createElement("tr");
-loadingElement.id="loading"
-loadingElement.innerHTML=`<td colspan="2">Loading...</td>`
-const tbodyElement=document.getElementById("output");
-tbodyElement.append(loadingElement)
-let start1=new Date().getTime();
-let promise1=new Promise((resolve, reject)=>{
-setTimeout(()=>{
-resolve()
-let end1=new Date().getTime();
-appendfunc("promise1",(end1-start1)/1000)
-},1000)
-})
-let start2=new Date().getTime();
-let promise2=new Promise((resolve,reject)=>{
-setTimeout(()=>{
-resolve()
-let end2=new Date().getTime();
-appendfunc("promise2",(end2-start2)/1000)
-},2000)
-})
-let start3=new Date().getTime();
-let promise3= new Promise((resolve,reject)=>{
-setTimeout(()=>{
-resolve()
-let end3=new Date().getTime();
-appendfunc("promise3",(end3-start3)/1000)
-},3000)
-})
-function appendfunc(name,time) {
-resultarray.push({name, time})
+let resultArray = [];
+const loadingElement = document.createElement("tr");
+loadingElement.id = "loading";
+loadingElement.innerHTML = `<td colspan="2">Loading...</td>`;
+const tbodyElement = document.getElementById("output");
+tbodyElement.append(loadingElement);
+
+function appendFunc(name, time) {
+  resultArray.push({ name, time });
 }
-let all=Promise.all([promise1,promise2,promise3]);
-all.then(()=>{
-loadingElement.remove();
-for (let i= 0; i<resultarray.length; i++) {
-let resulttr= document.createElement("tr");
-resulttr.innerHTML=`<td>${resultarray[i].name}</td>
-<td>${resultarray[i].time}</td>`
-tbodyElement.append(resulttr)
+
+let promises = [];
+
+// Create three promises, each resolving after a random time between 1 and 3 seconds
+for (let i = 1; i <= 3; i++) {
+  let start = new Date().getTime();
+  let randomTime = Math.floor(Math.random() * 3000) + 1000;
+
+  let promise = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve();
+      let end = new Date().getTime();
+      appendFunc(`Promise ${i}`, (end - start) / 1000);
+    }, randomTime);
+  });
+
+  promises.push(promise);
 }
-})
+
+Promise.all(promises)
+  .then(() => {
+    loadingElement.remove();
+
+    for (let i = 0; i < resultArray.length; i++) {
+      let resultTR = document.createElement("tr");
+      resultTR.innerHTML = `
+        <td>${resultArray[i].name}</td>
+        <td>${resultArray[i].time}</td>
+      `;
+      tbodyElement.append(resultTR);
+    }
+
+    // Calculate the total time taken
+    let totalTime = resultArray.reduce((sum, result) => sum + result.time, 0);
+
+    // Add a row for the total time
+    let totalTR = document.createElement("tr");
+    totalTR.innerHTML = `
+      <td>Total</td>
+      <td>${totalTime.toFixed(3)}</td>
+    `;
+    tbodyElement.append(totalTR);
+  })
+  .catch((error) => {
+    console.error(error);
+  });
